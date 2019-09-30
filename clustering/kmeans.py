@@ -1,7 +1,15 @@
+"""
+Author: Xiaoran Xu
+BU: xiaorxu
+CS506 - Extra Credit
+"""
+
+
 from collections import defaultdict
 from math import inf
 import random
 import csv
+import math
 
 
 def point_avg(points):
@@ -11,8 +19,10 @@ def point_avg(points):
     
     Returns a new point which is the center of all the points.
     """
-    raise NotImplementedError()
 
+    #https://stackoverflow.com/questions/3223043/how-do-i-sum-the-columns-in-2d-list
+    sum_pts = [sum(x) for x in zip(*points)]
+    return [col_sum /len(points) for col_sum in sum_pts]
 
 def update_centers(data_set, assignments):
     """
@@ -21,7 +31,18 @@ def update_centers(data_set, assignments):
     Compute the center for each of the assigned groups.
     Return `k` centers in a list
     """
-    raise NotImplementedError()
+
+    cluster_points = {}
+    for point, assignment in zip(data_set, assignments):
+        if not assignment in cluster_points.keys():
+            cluster_points[assignment] = []
+        cluster_points[assignment].append(point)
+
+    centers = []
+    for k in cluster_points.keys():
+        centers.append(point_avg(cluster_points[k]))
+
+    return centers
 
 
 def assign_points(data_points, centers):
@@ -44,7 +65,10 @@ def distance(a, b):
     """
     Returns the Euclidean distance between a and b
     """
-    raise NotImplementedError()
+    temp = 0
+    for i,j in zip(a,b):
+        temp += (i-j)**2
+    return math.sqrt(temp)
 
 
 def generate_k(data_set, k):
@@ -52,15 +76,24 @@ def generate_k(data_set, k):
     Given `data_set`, which is an array of arrays,
     return a random set of k points from the data_set
     """
-    raise NotImplementedError()
+    return random.sample(data_set, k)
 
 
 def get_list_from_dataset_file(dataset_file):
-    raise NotImplementedError()
-
+    data = []
+    with open(dataset_file, newline = '') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            data.append([int(r) for r in row])
+    return data
 
 def cost_function(clustering):
-    raise NotImplementedError()
+    cost = 0
+    for k,points in clustering.items():
+        center = point_avg(points)
+        for point in points:
+            cost += distance(center, point)
+    return cost
 
 
 def k_means(dataset_file, k):
